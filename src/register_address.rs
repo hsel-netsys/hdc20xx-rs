@@ -7,6 +7,8 @@ pub struct Register;
 impl Register {
     pub const TEMP_L: u8 = 0x00;
     pub const DRDY: u8 = 0x04;
+    pub const INTR_CONF: u8 = 0x07;
+    pub const RST_INT_CONF: u8 = 0x0E;
     pub const MEAS_CONF: u8 = 0x0F;
     pub const MANUFACTURER_ID_L: u8 = 0xFC;
     pub const DEVICE_ID_L: u8 = 0xFE;
@@ -15,6 +17,7 @@ impl Register {
 pub struct BitFlags;
 impl BitFlags {
     pub const SOFT_RESET: u8 = 1 << 7;
+    pub const DRDY_INT_EN: u8 = 1 << 2;
     pub const TEMP_ONLY: u8 = 1 << 1;
     pub const MEAS_TRIG: u8 = 1;
     pub const DRDY_STATUS: u8 = 1 << 7;

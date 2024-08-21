@@ -139,7 +139,7 @@
 use core::marker::PhantomData;
 mod device_impl;
 mod types;
-pub use crate::types::{Error, Measurement, MeasurementMode, SlaveAddr, Status};
+pub use crate::types::{Error, Measurement, MeasurementMode, SlaveAddr, Status, AutomaticMeasurementMode};
 mod register_address;
 use crate::register_address::{BitFlags, Register, BASE_ADDR};
 
@@ -150,6 +150,7 @@ pub struct Hdc20xx<I2C, MODE> {
     address: u8,
     meas_config: Config,
     was_measurement_started: bool,
+    amm_enabled: bool,
     _mode: PhantomData<MODE>,
 }
 

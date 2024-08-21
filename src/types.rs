@@ -78,6 +78,28 @@ impl SlaveAddr {
     }
 }
 
+/// Possible automatic measurement mode choices.
+#[repr(u8)]
+#[derive(Copy, Debug, PartialEq, Eq, Clone)]
+pub enum AutomaticMeasurementMode {
+    /// Disable automatic measurement
+    Disabled    = 0b00000000,
+    /// Measure once every two minutes
+    TwoMinutes  = 0b00010100,
+    /// Measure once every minute
+    OneMinute   = 0b00100100,
+    /// Measure once every ten seconds
+    TenSeconds  = 0b00110100,
+    /// Measure once every five seconds
+    FiveSeconds = 0b01000100,
+    /// Measure once per second
+    OneHertz    = 0b01010100,
+    /// Measure twice per second
+    TwoHertz    = 0b01100100,
+    /// Measure five times per second
+    FiveHertz   = 0b01110100,
+}
+
 #[cfg(test)]
 mod tests {
     use super::BASE_ADDR as ADDR;

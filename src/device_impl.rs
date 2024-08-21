@@ -1,5 +1,5 @@
 use crate::{
-    mode, BitFlags, Config, Error, Hdc20xx, Measurement, MeasurementMode, Register, SlaveAddr,
+    mode, BitFlags, Config, Error, Hdc20xx, Measurement, MeasurementMode, Register, SlaveAddr, AutomaticMeasurementMode,
     Status,
 };
 use core::marker::PhantomData;
@@ -13,6 +13,7 @@ impl<I2C> Hdc20xx<I2C, mode::OneShot> {
             address: address.addr(),
             meas_config: Config { bits: 0 },
             was_measurement_started: false,
+            amm_enabled: false,
             _mode: PhantomData,
         }
     }
@@ -75,7 +76,7 @@ where
     /// Note that all status except the last one once data becomes available
     /// are discarded.
     pub fn read(&mut self) -> nb::Result<Measurement, Error<E>> {
-        if self.was_measurement_started {
+        if self.was_measurement_started || self.amm_enabled {
             let status = self.status()?;
             if status.data_ready {
                 let include_humidity = !self.meas_config.is_high(BitFlags::TEMP_ONLY);
@@ -112,6 +113,22 @@ where
             self.was_measurement_started = true;
             Err(nb::Error::WouldBlock)
         }
+    }
+
+    /// Sets the automatic measurement mode for this sensor.
+    pub fn set_automatic_measurement(&mut self, mode: AutomaticMeasurementMode) -> Result<(), Error<E>> {
+        let amm_enabled = mode != AutomaticMeasurementMode::Disabled;
+        let rst_conf = mode as u8;
+        self.write_register(Register::RST_INT_CONF, rst_conf)?;
+        self.write_register(
+            Register::INTR_CONF,
+            if amm_enabled { 0b10000000 } else { 0b00000000 }
+        )?;
+        // Have to trigger measurements once.
+        let meas_conf = self.meas_config.with_high(BitFlags::MEAS_TRIG);
+        self.write_register(Register::MEAS_CONF, meas_conf.bits)?;
+        self.amm_enabled = amm_enabled;
+        Ok(())
     }
 
     /// Software reset
